@@ -1,4 +1,4 @@
-import type { Task } from '../types/task'
+import type { CreateTaskInput, Task, UpdateTaskInput } from '../types/task'
 
 // One place that knows how to talk to the API.
 // fetch() does NOT throw on 404/500, so we check res.ok ourselves.
@@ -14,9 +14,30 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
     throw new Error(body?.error ?? `Request failed with status ${res.status}`)
   }
 
+  // 204 No Content has no body, so res.json() would throw
+  if (res.status === 204) return undefined as T
+
   return res.json() as Promise<T>
 }
 
 export function getTasks(): Promise<Task[]> {
   return request<Task[]>('/api/tasks')
+}
+
+export function createTask(input: CreateTaskInput): Promise<Task> {
+  return request<Task>('/api/tasks', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+}
+
+export function updateTask(id: string, input: UpdateTaskInput): Promise<Task> {
+  return request<Task>(`/api/tasks/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export function deleteTask(id: string): Promise<void> {
+  return request<void>(`/api/tasks/${id}`, { method: 'DELETE' })
 }

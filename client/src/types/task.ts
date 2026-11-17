@@ -9,3 +9,7 @@ export type Task = {
   status: TaskStatus
   createdAt: string
 }
+
+export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'status'>
+
+export type UpdateTaskInput = Partial<Omit<Task, 'id' | 'createdAt'>>
