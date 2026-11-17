@@ -4,6 +4,7 @@ export type TaskStatus = 'todo' | 'in_progress' | 'done'
 // The full shape of a task as stored and returned by the API
 export type Task = {
   id: string
+  userId: string // the owner; each user only sees their own tasks
   title: string
   description?: string
   status: TaskStatus
@@ -11,9 +12,9 @@ export type Task = {
 }
 
 // What the client sends to create a task.
-// The server sets id, createdAt and status itself, so the client can't.
-export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'status'>
+// The server sets id, userId, createdAt and status itself, so the client can't.
+export type CreateTaskInput = Omit<Task, 'id' | 'userId' | 'createdAt' | 'status'>
 
 // What the client sends to update a task.
-// Every field is optional (PATCH = partial update), and id/createdAt can't be changed.
-export type UpdateTaskInput = Partial<Omit<Task, 'id' | 'createdAt'>>
+// Every field is optional (PATCH = partial update), and id/userId/createdAt can't be changed.
+export type UpdateTaskInput = Partial<Omit<Task, 'id' | 'userId' | 'createdAt'>>

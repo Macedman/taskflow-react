@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import { getAuthUser } from '../../middleware/requireAuth.js'
 import * as tasksService from './tasks.service.js'
 import type { CreateTaskInput, TaskStatus, UpdateTaskInput } from './tasks.types.js'
 
@@ -17,13 +18,15 @@ function isTaskStatus(value: unknown): value is TaskStatus {
 }
 
 // GET /api/tasks
-export function getTasks(_req: Request, res: Response) {
-  res.json(tasksService.getAll())
+export function getTasks(req: Request, res: Response) {
+  const user = getAuthUser(req)
+  res.json(tasksService.getAll(user.id))
 }
 
 // GET /api/tasks/:id
 export function getTaskById(req: Request<IdParams>, res: Response) {
-  const task = tasksService.getById(req.params.id)
+  const user = getAuthUser(req)
+  const task = tasksService.getById(req.params.id, user.id)
   if (!task) {
     res.status(404).json({ error: 'Task not found' })
     return
@@ -48,7 +51,8 @@ export function createTask(req: Request, res: Response) {
   const input: CreateTaskInput = { title: title.trim() }
   if (description !== undefined) input.description = description
 
-  const task = tasksService.create(input)
+  const user = getAuthUser(req)
+  const task = tasksService.create(user.id, input)
   res.status(201).json(task)
 }
 
@@ -84,7 +88,8 @@ export function updateTask(req: Request<IdParams>, res: Response) {
     return
   }
 
-  const task = tasksService.update(req.params.id, input)
+  const user = getAuthUser(req)
+  const task = tasksService.update(req.params.id, user.id, input)
   if (!task) {
     res.status(404).json({ error: 'Task not found' })
     return
@@ -94,7 +99,8 @@ export function updateTask(req: Request<IdParams>, res: Response) {
 
 // DELETE /api/tasks/:id
 export function deleteTask(req: Request<IdParams>, res: Response) {
-  const deleted = tasksService.remove(req.params.id)
+  const user = getAuthUser(req)
+  const deleted = tasksService.remove(req.params.id, user.id)
   if (!deleted) {
     res.status(404).json({ error: 'Task not found' })
     return
